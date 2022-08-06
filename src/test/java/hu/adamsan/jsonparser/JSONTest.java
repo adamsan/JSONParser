@@ -17,7 +17,14 @@ class JSONTest {
     void assertJSONparseCanParseInteger() {
         Number number = 44;
         JSON.JSONNumber json = (JSON.JSONNumber) JSON.parse(String.valueOf(number));
-        assertEquals(number.intValue(), json.value);
+        assertEquals(number.intValue(), json.value.intValue());
+    }
+
+    @Test
+    void assertJSONparseCanParseDouble() {
+        Number number = 44.345;
+        JSON.JSONNumber json = (JSON.JSONNumber) JSON.parse(String.valueOf(number));
+        assertEquals(number.doubleValue(), json.value.doubleValue());
     }
 
 }

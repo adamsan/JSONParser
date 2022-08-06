@@ -1,13 +1,26 @@
 package hu.adamsan.jsonparser;
 
+import java.math.BigDecimal;
+
 public class JSON {
     private JSON() {
     }
 
     public static JSON parse(String json) {
         json = json.trim();
-        if(isString(json)) return new JSONString(json);
-        else return new JSONNumber(json);
+        if (isString(json)) return new JSONString(json);
+        if (isNumber(json)) return new JSONNumber(json);
+        else return null;
+    }
+
+    private static boolean isNumber(String json) {
+        if (json == null) return false;
+        try {
+            Double.parseDouble(json);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private static boolean isString(String json) {
@@ -23,10 +36,14 @@ public class JSON {
     }
 
     static class JSONNumber extends JSON {
-        int value;
+        BigDecimal value;
 
-        public JSONNumber(String json){
-            this.value = Integer.parseInt(json);
+        public JSONNumber(String json) {
+            try {
+                this.value = BigDecimal.valueOf(Integer.parseInt(json));
+            } catch (NumberFormatException ex) {
+                this.value = BigDecimal.valueOf(Double.parseDouble(json));
+            }
         }
     }
 }
