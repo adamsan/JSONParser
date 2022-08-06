@@ -2,7 +2,7 @@ package hu.adamsan.jsonparser;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JSONTest {
 
@@ -87,4 +87,16 @@ class JSONTest {
         assertThat(json.map.keySet()).hasSize(2);
     }
 
+    @Test
+    void assertJsonParserCanParseObjectContainingArray() {
+        String input = "  { \"name\": \"Thomas\", \"age\" : 19, \"lucky_numbers\":[1, 3, 9] } ";
+        JSON.JSONObject json = (JSON.JSONObject) JSON.parse(input);
+        assertThat(json).isNotNull();
+        assertThat(json.map.keySet()).hasSize(3);
+
+        assertThat(json.map.get(new JSON.JSONString("\"name\""))).isInstanceOf(JSON.JSONString.class);
+        assertThat(json.map.get(new JSON.JSONString("\"age\""))).isInstanceOf(JSON.JSONNumber.class);
+        assertThat(json.map.get(new JSON.JSONString("\"lucky_numbers\""))).isInstanceOf(JSON.JSONArray.class);
+
+    }
 }

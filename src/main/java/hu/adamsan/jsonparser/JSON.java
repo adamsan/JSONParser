@@ -46,8 +46,19 @@ public sealed class JSON {
     }
 
     private static List<Integer> findCommaIndexes(String inside) {
+        Deque<Character> q = new LinkedList<>();
         return IntStream.range(0, inside.length())
-                .filter(i -> inside.charAt(i) == ',')
+                .peek(i -> {
+                    char c = inside.charAt(i);
+                    switch (c) {
+                        case '{' -> q.push('}');
+                        case '[' -> q.push(']');
+                        case ']', '}' -> {
+                            if (!q.isEmpty() && q.peek() == c) q.pop();
+                        }
+                    }
+                })
+                .filter(i -> inside.charAt(i) == ',' && q.size() == 0)
                 .boxed().toList();
     }
 
@@ -68,7 +79,22 @@ public sealed class JSON {
         String value;
 
         public JSONString(String value) {
+            if (!value.startsWith("\"") || !value.endsWith("\""))
+                throw new IllegalArgumentException("parameter did not start or end with '\"'!");
             this.value = value.substring(1, value.length() - 1);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            JSONString that = (JSONString) o;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
     }
 
@@ -113,9 +139,7 @@ public sealed class JSON {
             List<Integer> commaIndexes = findCommaIndexes(inside);
             splitByIndexes(inside, commaIndexes)
                     .map(s -> s.split(":", 2))
-                    .peek(System.out::println)
                     .forEach(e -> map.put(new JSONString(e[0].trim()), JSON.parse(e[1])));
-
         }
     }
 }
