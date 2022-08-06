@@ -3,8 +3,10 @@ package hu.adamsan.jsonparser;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -245,6 +247,30 @@ public sealed abstract class JSON {
         private <T> T tryToConvert(Class<T> clazz) throws ReflectiveOperationException {
             Constructor<T> constructor = clazz.getConstructor();
             T object = constructor.newInstance();
+
+            Predicate<Map.Entry<JSONString, JSON>> isSimpleDataOrNull = e ->
+                    e.getValue() instanceof JSONString ||
+                            e.getValue() instanceof JSONNumber ||
+                            e.getValue() instanceof JSONNull;
+
+            map.entrySet().stream()
+                    .filter(isSimpleDataOrNull)
+                    .forEach(e -> {
+                        var setterName = "set" + e.getKey().value;
+                        Arrays.stream(clazz.getMethods())
+                                .filter(m -> m.getName().equalsIgnoreCase(setterName))
+                                .filter(m -> m.getParameterCount() == 1)
+                                .findFirst()
+                                .ifPresent(method -> {
+                                    Class<?> parameterType = method.getParameterTypes()[0];
+                                    Object o = e.getValue().convert(parameterType);
+                                    try {
+                                        method.invoke(object, o);
+                                    } catch (IllegalArgumentException | ReflectiveOperationException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                });
+                    });
             return object;
         }
     }

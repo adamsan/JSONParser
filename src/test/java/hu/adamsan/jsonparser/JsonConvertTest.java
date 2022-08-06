@@ -101,6 +101,8 @@ public class JsonConvertTest {
                 """;
         Person person = JSON.parse(input).convert(Person.class);
         assertThat(person.getId()).isNull();
+        assertThat(person.getFirstName()).isEqualTo("John");
+        assertThat(person.getAge()).isEqualTo(35);
     }
 }
 
