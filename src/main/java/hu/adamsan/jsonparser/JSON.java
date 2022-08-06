@@ -76,6 +76,8 @@ public sealed abstract class JSON {
         return Arrays.stream(builder.toString().split(String.valueOf(splitBy)));
     }
 
+    public abstract <T> T convert(Class<T> clazz);
+
     static final class JSONString extends JSON {
         String value;
 
@@ -102,6 +104,11 @@ public sealed abstract class JSON {
         public String toString() {
             return '"' + value + '"';
         }
+
+        @Override
+        public <T> T convert(Class<T> clazz) {
+            return null;
+        }
     }
 
     static final class JSONNumber extends JSON {
@@ -109,7 +116,7 @@ public sealed abstract class JSON {
 
         public JSONNumber(String json) {
             try {
-                this.value = BigDecimal.valueOf(Integer.parseInt(json));
+                this.value = BigDecimal.valueOf(Long.parseLong(json));
             } catch (NumberFormatException ex) {
                 this.value = BigDecimal.valueOf(Double.parseDouble(json));
             }
@@ -121,8 +128,35 @@ public sealed abstract class JSON {
         }
 
         public Number getValue() {
-            if (value.stripTrailingZeros().scale() <= 0) return value.intValue();
+            if (isInteger()) return value.intValue();
             return value.doubleValue();
+        }
+
+        private boolean isInteger() {
+            return value.stripTrailingZeros().scale() <= 0;
+        }
+
+        @Override
+        public <T> T convert(Class<T> clazz) {
+            List<?> intTypes = List.of(Integer.class, Short.class, Long.class, Byte.class);
+            if (!isInteger() && intTypes.contains(clazz)) throw new JsonNumberConversionException();
+            try {
+                if (clazz == Long.class) return (T) (Long) value.longValue();
+                if (clazz == Integer.class) return (T) (Integer) value.intValue();
+                if (clazz == Short.class) return (T) (Short) value.shortValueExact();
+                if (clazz == Byte.class) return (T) (Byte) value.byteValueExact();
+
+                if (clazz == Double.class) return (T) (Double) value.doubleValue();
+                if (clazz == Float.class) return (T) (Float) value.floatValue();
+                if (clazz == BigDecimal.class) return (T) value;
+                return (T) getValue();
+            } catch (ClassCastException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        static class JsonNumberConversionException extends RuntimeException {
+
         }
     }
 
@@ -130,6 +164,10 @@ public sealed abstract class JSON {
         @Override
         public String toString() {
             return "null";
+        }
+
+        public <T> T convert(Class<T> clazz) {
+            return null;
         }
     }
 
@@ -147,6 +185,11 @@ public sealed abstract class JSON {
         @Override
         public String toString() {
             return items.stream().map(JSON::toString).collect(Collectors.joining(", ", "[", "]"));
+        }
+
+        @Override
+        public <T> T convert(Class<T> clazz) {
+            return null;
         }
     }
 
@@ -170,6 +213,11 @@ public sealed abstract class JSON {
         public String toString() {
             return keysInOrder.stream()
                     .map(k -> k.toString() + ": " + map.get(k).toString()).collect(Collectors.joining(", ", "{", "}"));
+        }
+
+        @Override
+        public <T> T convert(Class<T> clazz) {
+            return null;
         }
     }
 
