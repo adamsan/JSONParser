@@ -24,4 +24,18 @@ public class JsonToStringTest {
         String s = "\"some sneaky string\"";
         assertThat(new JSON.JSONString(s).toString()).isEqualTo(s);
     }
+
+    @Test
+    void assertJsonArrayCanStringify() {
+        String arr = "[1, 2, 3.55, \"apple\"]";
+        assertThat(new JSON.JSONArray(arr).toString()).isEqualTo(arr);
+    }
+
+    @Test
+    void assertJsonObjectCanStringify() {
+        String obj = "{\"id\": 7234, \"title\": \"The lost paradise\", \"scores\": [4, 2, 5]}";
+        assertThat(new JSON.JSONObject(obj).toString()).isEqualTo(obj);
+    }
+
+
 }

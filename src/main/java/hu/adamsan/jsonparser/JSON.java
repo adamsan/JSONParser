@@ -2,6 +2,7 @@ package hu.adamsan.jsonparser;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -142,17 +143,33 @@ public sealed abstract class JSON {
                     .map(JSON::parse)
                     .forEach(items::add);
         }
+
+        @Override
+        public String toString() {
+            return items.stream().map(JSON::toString).collect(Collectors.joining(", ", "[", "]"));
+        }
     }
 
     static final class JSONObject extends JSON {
         Map<JSONString, JSON> map = new HashMap<>();
+        List<JSONString> keysInOrder = new ArrayList<>();
 
         public JSONObject(String json) {
             String inside = json.substring(1, json.length() - 1);
             List<Integer> commaIndexes = findCommaIndexes(inside);
             splitByIndexes(inside, commaIndexes)
                     .map(s -> s.split(":", 2))
-                    .forEach(e -> map.put(new JSONString(e[0].trim()), JSON.parse(e[1])));
+                    .forEach(e -> {
+                        JSONString key = new JSONString(e[0].trim());
+                        map.put(key, JSON.parse(e[1]));
+                        keysInOrder.add(key);
+                    });
+        }
+
+        @Override
+        public String toString() {
+            return keysInOrder.stream()
+                    .map(k -> k.toString() + ": " + map.get(k).toString()).collect(Collectors.joining(", ", "{", "}"));
         }
     }
 
