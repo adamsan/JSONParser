@@ -52,7 +52,7 @@ public sealed class JSON {
         String value;
 
         public JSONString(String value) {
-            this.value = value;
+            this.value = value.substring(1, value.length() - 1);
         }
     }
 
@@ -68,7 +68,7 @@ public sealed class JSON {
         }
 
         public Number getValue() {
-            if(value.stripTrailingZeros().scale() <= 0) return value.intValue();
+            if (value.stripTrailingZeros().scale() <= 0) return value.intValue();
             return value.doubleValue();
         }
     }
