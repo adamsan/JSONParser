@@ -70,4 +70,13 @@ class JSONTest {
         assertThat(second.value).isEqualTo("orange");
     }
 
+
+    @Test
+    void assertJsonParseCanParseArrayOfNumbersWithSpecialChar() {
+        String input = "[ 5, 6, \"ⶔ\" , 60]";
+        JSON.JSONArray json = (JSON.JSONArray) JSON.parse(input);
+        assertThat(json).isNotNull();
+        assertThat(json.items).hasSize(4);
+    }
+
 }

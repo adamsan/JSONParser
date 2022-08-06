@@ -48,6 +48,12 @@ public sealed class JSON {
                 .boxed().toList();
     }
 
+    private static char findSpecialCharNotInString(String inside) {
+        char specialChar = 'ⶔ';
+        while (inside.indexOf(specialChar) > 0) specialChar++; // in case above char occures in the string.
+        return specialChar;
+    }
+
     static final class JSONString extends JSON {
         String value;
 
@@ -90,9 +96,9 @@ public sealed class JSON {
 
         private Stream<String> splitByIndexes(String inside, List<Integer> commaIndexes) {
             StringBuilder builder = new StringBuilder(inside);
-            char specialChar = 'ⶔ'; // assume this does not occures in inside string
-            commaIndexes.forEach(i -> builder.setCharAt(i, specialChar));
-            return Arrays.stream(builder.toString().split(String.valueOf(specialChar)));
+            char splitBy = findSpecialCharNotInString(inside);
+            commaIndexes.forEach(i -> builder.setCharAt(i, splitBy));
+            return Arrays.stream(builder.toString().split(String.valueOf(splitBy)));
         }
     }
 }
