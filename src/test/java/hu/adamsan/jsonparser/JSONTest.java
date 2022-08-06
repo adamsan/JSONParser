@@ -79,4 +79,12 @@ class JSONTest {
         assertThat(json.items).hasSize(4);
     }
 
+    @Test
+    void assertJsonParserCanParseObject() {
+        String input = "  { \"name\": \"Thomas\", \"age\" : 19 } ";
+        JSON.JSONObject json = (JSON.JSONObject) JSON.parse(input);
+        assertThat(json).isNotNull();
+        assertThat(json.map.keySet()).hasSize(2);
+    }
+
 }

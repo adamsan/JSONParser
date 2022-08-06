@@ -1,9 +1,7 @@
 package hu.adamsan.jsonparser;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -17,7 +15,12 @@ public sealed class JSON {
         if (isNumber(json)) return new JSONNumber(json);
         if (isNull(json)) return new JSONNull();
         if (isArray(json)) return new JSONArray(json);
+        if (isObject(json)) return new JSONObject(json);
         else return null;
+    }
+
+    private static boolean isObject(String json) {
+        return json.startsWith("{") && json.endsWith("}");
     }
 
     private static boolean isArray(String json) {
@@ -52,6 +55,13 @@ public sealed class JSON {
         char specialChar = 'ⶔ';
         while (inside.indexOf(specialChar) > 0) specialChar++; // in case above char occures in the string.
         return specialChar;
+    }
+
+    protected static Stream<String> splitByIndexes(String inside, List<Integer> commaIndexes) {
+        StringBuilder builder = new StringBuilder(inside);
+        char splitBy = findSpecialCharNotInString(inside);
+        commaIndexes.forEach(i -> builder.setCharAt(i, splitBy));
+        return Arrays.stream(builder.toString().split(String.valueOf(splitBy)));
     }
 
     static final class JSONString extends JSON {
@@ -93,12 +103,19 @@ public sealed class JSON {
                     .map(JSON::parse)
                     .forEach(items::add);
         }
+    }
 
-        private Stream<String> splitByIndexes(String inside, List<Integer> commaIndexes) {
-            StringBuilder builder = new StringBuilder(inside);
-            char splitBy = findSpecialCharNotInString(inside);
-            commaIndexes.forEach(i -> builder.setCharAt(i, splitBy));
-            return Arrays.stream(builder.toString().split(String.valueOf(splitBy)));
+    static final class JSONObject extends JSON {
+        Map<JSONString, JSON> map = new HashMap<>();
+
+        public JSONObject(String json) {
+            String inside = json.substring(1, json.length() - 1);
+            List<Integer> commaIndexes = findCommaIndexes(inside);
+            splitByIndexes(inside, commaIndexes)
+                    .map(s -> s.split(":", 2))
+                    .peek(System.out::println)
+                    .forEach(e -> map.put(new JSONString(e[0].trim()), JSON.parse(e[1])));
+
         }
     }
 }
