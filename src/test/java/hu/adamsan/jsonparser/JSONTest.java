@@ -97,6 +97,19 @@ class JSONTest {
         assertThat(json.map.get(new JSON.JSONString("\"name\""))).isInstanceOf(JSON.JSONString.class);
         assertThat(json.map.get(new JSON.JSONString("\"age\""))).isInstanceOf(JSON.JSONNumber.class);
         assertThat(json.map.get(new JSON.JSONString("\"lucky_numbers\""))).isInstanceOf(JSON.JSONArray.class);
-
     }
+
+    @Test
+    void assertJsonParserCanParseComplexArray() {
+        String input = """
+                [
+                    { "id": 2, "name": "Tom" },
+                    {"id": 3, "name": "Jerry" }
+                ]
+                """;
+        var json = (JSON.JSONArray) JSON.parse(input);
+        assertThat(json).isNotNull();
+        assertThat(json.items).hasSize(2);
+    }
+
 }

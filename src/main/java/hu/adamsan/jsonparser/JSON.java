@@ -16,7 +16,7 @@ public sealed class JSON {
         if (isNull(json)) return new JSONNull();
         if (isArray(json)) return new JSONArray(json);
         if (isObject(json)) return new JSONObject(json);
-        else return null;
+        throw new JsonParseException("Could not parse:\n" + json);
     }
 
     private static boolean isObject(String json) {
@@ -140,6 +140,12 @@ public sealed class JSON {
             splitByIndexes(inside, commaIndexes)
                     .map(s -> s.split(":", 2))
                     .forEach(e -> map.put(new JSONString(e[0].trim()), JSON.parse(e[1])));
+        }
+    }
+
+    private static class JsonParseException extends RuntimeException {
+        public JsonParseException(String message) {
+            super(message);
         }
     }
 }
