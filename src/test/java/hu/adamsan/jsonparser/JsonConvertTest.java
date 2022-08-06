@@ -76,6 +76,14 @@ public class JsonConvertTest {
         assertThat(json).hasSize(4).containsExactlyInAnyOrder(1, 10, 20, 159);
     }
 
+    @Test
+    void testJsonArrayConversionCanConvertToStringList() {
+        String input = "[\"apple\", \"banana\", \"coconut\"]";
+        List<String> nums = new ArrayList<>();
+        var json = new JSON.JSONArray(input).convert(nums.getClass()); // TODO: how to preserve type information?
+        assertThat(json).hasSize(3).containsExactly("apple", "banana", "coconut");
+    }
+
 
 
 }

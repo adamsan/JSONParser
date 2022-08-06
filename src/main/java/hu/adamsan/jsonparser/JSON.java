@@ -108,7 +108,7 @@ public sealed abstract class JSON {
 
         @Override
         public <T> T convert(Class<T> clazz) {
-            return null;
+            return (T) value;
         }
     }
 
