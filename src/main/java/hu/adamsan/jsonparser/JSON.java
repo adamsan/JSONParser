@@ -2,7 +2,7 @@ package hu.adamsan.jsonparser;
 
 import java.math.BigDecimal;
 
-public class JSON {
+public sealed class JSON {
     private JSON() {
     }
 
@@ -10,7 +10,12 @@ public class JSON {
         json = json.trim();
         if (isString(json)) return new JSONString(json);
         if (isNumber(json)) return new JSONNumber(json);
+        if (isNull(json)) return new JSONNull();
         else return null;
+    }
+
+    private static boolean isNull(String json) {
+        return "null".equals(json);
     }
 
     private static boolean isNumber(String json) {
@@ -27,7 +32,7 @@ public class JSON {
         return json.startsWith("\"") && json.endsWith("\"");
     }
 
-    static class JSONString extends JSON {
+    static final class JSONString extends JSON {
         String value;
 
         public JSONString(String value) {
@@ -35,7 +40,7 @@ public class JSON {
         }
     }
 
-    static class JSONNumber extends JSON {
+    static final class JSONNumber extends JSON {
         BigDecimal value;
 
         public JSONNumber(String json) {
@@ -45,5 +50,9 @@ public class JSON {
                 this.value = BigDecimal.valueOf(Double.parseDouble(json));
             }
         }
+    }
+
+    static final class JSONNull extends JSON {
+
     }
 }
