@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public sealed class JSON {
+public sealed abstract class JSON {
     private JSON() {
     }
 
@@ -96,6 +96,11 @@ public sealed class JSON {
         public int hashCode() {
             return Objects.hash(value);
         }
+
+        @Override
+        public String toString() {
+            return '"' + value + '"';
+        }
     }
 
     static final class JSONNumber extends JSON {
@@ -109,6 +114,11 @@ public sealed class JSON {
             }
         }
 
+        @Override
+        public String toString() {
+            return getValue().toString();
+        }
+
         public Number getValue() {
             if (value.stripTrailingZeros().scale() <= 0) return value.intValue();
             return value.doubleValue();
@@ -116,7 +126,10 @@ public sealed class JSON {
     }
 
     static final class JSONNull extends JSON {
-
+        @Override
+        public String toString() {
+            return "null";
+        }
     }
 
     static final class JSONArray extends JSON {

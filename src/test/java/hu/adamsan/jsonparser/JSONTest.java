@@ -111,5 +111,4 @@ class JSONTest {
         assertThat(json).isNotNull();
         assertThat(json.items).hasSize(2);
     }
-
 }
