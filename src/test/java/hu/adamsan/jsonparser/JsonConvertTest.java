@@ -1,6 +1,9 @@
 package hu.adamsan.jsonparser;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,6 +40,29 @@ public class JsonConvertTest {
     void testJsonNumberConversionFloatingPointToFloatingPoint() {
         assertThat(new JSON.JSONNumber("12.226").convert(Double.class)).isEqualTo(12.226);
         assertThat(new JSON.JSONNumber("56.159").convert(Float.class)).isEqualTo(56.159f);
+    }
+
+    @Test
+    void testJsonArrayConversionCanConvertToIntArray() {
+        String input = "[1, 10, 20]";
+        var json = new JSON.JSONArray(input).convert(int[].class);
+        assertThat(json).hasSize(3).containsExactly(1, 10, 20);
+    }
+
+
+    @Test
+    void testJsonArrayConversionCanConvertToDoubleArray() {
+        String input = "[3.14, 10, 20.5]";
+        var json = new JSON.JSONArray(input).convert(double[].class);
+        assertThat(json).hasSize(3).containsExactly(3.14, 10, 20.5);
+    }
+
+    @Test
+    @Disabled
+    void testJsonArrayConversionCanConvertToIntList() {
+        String input = "[1, 10, 20]";
+        var json = new JSON.JSONArray(input).convert(List.class); // TODO: how to preserve type information?
+        assertThat(json).hasSize(3).containsExactly(1, 10, 20);
     }
 
 }

@@ -1,5 +1,6 @@
 package hu.adamsan.jsonparser;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -189,6 +190,15 @@ public sealed abstract class JSON {
 
         @Override
         public <T> T convert(Class<T> clazz) {
+            if(clazz.isArray()){
+                Object arr = Array.newInstance(clazz.getComponentType(), items.size());
+                for (int i = 0; i < items.size(); i++) {
+                    JSON json = items.get(i);
+                    Object convertedItem = json.convert(clazz.componentType());
+                    Array.set(arr, i, convertedItem);
+                }
+                return (T) arr;
+            }
             return null;
         }
     }
