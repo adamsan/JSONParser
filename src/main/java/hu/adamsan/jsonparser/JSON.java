@@ -1,6 +1,8 @@
 package hu.adamsan.jsonparser;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -190,7 +192,7 @@ public sealed abstract class JSON {
 
         @Override
         public <T> T convert(Class<T> clazz) {
-            if(clazz.isArray()){
+            if (clazz.isArray()) {
                 Object arr = Array.newInstance(clazz.getComponentType(), items.size());
                 for (int i = 0; i < items.size(); i++) {
                     JSON json = items.get(i);
@@ -203,7 +205,7 @@ public sealed abstract class JSON {
             if (List.class.isAssignableFrom(clazz))
                 return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).toList();
 
-            if(Set.class.isAssignableFrom(clazz))
+            if (Set.class.isAssignableFrom(clazz))
                 return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).collect(Collectors.toSet());
             return null;
         }
@@ -233,13 +235,29 @@ public sealed abstract class JSON {
 
         @Override
         public <T> T convert(Class<T> clazz) {
-            return null;
+            try {
+                return tryToConvert(clazz);
+            } catch (ReflectiveOperationException e) {
+                throw new JsonConversionException(this.toString(), clazz, e);
+            }
+        }
+
+        private <T> T tryToConvert(Class<T> clazz) throws ReflectiveOperationException {
+            Constructor<T> constructor = clazz.getConstructor();
+            T object = constructor.newInstance();
+            return object;
         }
     }
 
     private static class JsonParseException extends RuntimeException {
         public JsonParseException(String message) {
             super(message);
+        }
+    }
+
+    private static class JsonConversionException extends RuntimeException {
+        public JsonConversionException(String json, Class<?> clazz, Throwable cause) {
+            super("Could not convert to " + clazz + " the following JSON object: " + json, cause);
         }
     }
 }

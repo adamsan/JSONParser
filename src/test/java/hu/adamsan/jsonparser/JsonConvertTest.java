@@ -1,6 +1,6 @@
 package hu.adamsan.jsonparser;
 
-import org.junit.jupiter.api.Disabled;
+import hu.adamsan.jsonparser.testmodels.Person;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -84,6 +84,24 @@ public class JsonConvertTest {
         assertThat(json).hasSize(3).containsExactly("apple", "banana", "coconut");
     }
 
-
-
+    @Test
+    void testJsonArrayConversionCanConvertSimpleObject() {
+        String input = """
+                {
+                    "id": null,
+                    "firstName": "John",
+                    "lastName": [1,2,3,4,5],
+                    "items":{
+                        "name":"orange",
+                        "price": 25.5,
+                        "type": "food"
+                    },
+                    "age": 35
+                }
+                """;
+        Person person = JSON.parse(input).convert(Person.class);
+        assertThat(person.getId()).isNull();
+    }
 }
+
+
