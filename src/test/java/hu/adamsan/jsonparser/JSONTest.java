@@ -3,21 +3,21 @@ package hu.adamsan.jsonparser;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JSONTest {
 
     @Test
-    void assertJsonCantBeInstantiatedWithConstructor() {
-        assertThrows(
-                NoSuchMethodException.class,
-                JSON.class::getConstructor);
+    void assertJSONparseCanParseString() {
+        String string = "\"apple\"";
+        JSON.JSONString json = (JSON.JSONString) JSON.parse(string);
+        assertEquals(string, json.value);
     }
 
     @Test
-    void assertJSONparseCanParseString() {
-        String string = "\"apple\"";
-        JSON.JSONString json = JSON.parser(string);
-        assertEquals(string, json.value);
+    void assertJSONparseCanParseInteger() {
+        Number number = 44;
+        JSON.JSONNumber json = (JSON.JSONNumber) JSON.parse(String.valueOf(number));
+        assertEquals(number.intValue(), json.value);
     }
+
 }
