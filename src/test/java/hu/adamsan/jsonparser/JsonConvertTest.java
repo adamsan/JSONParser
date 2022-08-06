@@ -3,7 +3,10 @@ package hu.adamsan.jsonparser;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,11 +61,21 @@ public class JsonConvertTest {
     }
 
     @Test
-    @Disabled
     void testJsonArrayConversionCanConvertToIntList() {
         String input = "[1, 10, 20]";
-        var json = new JSON.JSONArray(input).convert(List.class); // TODO: how to preserve type information?
+        List<Integer> nums = new ArrayList<>();
+        var json = new JSON.JSONArray(input).convert(nums.getClass()); // TODO: how to preserve type information?
         assertThat(json).hasSize(3).containsExactly(1, 10, 20);
     }
+
+    @Test
+    void testJsonArrayConversionCanConvertToIntSet() {
+        String input = "[1, 10, 20, 159]";
+        Set<Integer> nums = new HashSet<>();
+        var json = new JSON.JSONArray(input).convert(nums.getClass()); // TODO: how to preserve type information?
+        assertThat(json).hasSize(4).containsExactlyInAnyOrder(1, 10, 20, 159);
+    }
+
+
 
 }

@@ -199,6 +199,12 @@ public sealed abstract class JSON {
                 }
                 return (T) arr;
             }
+
+            if (List.class.isAssignableFrom(clazz))
+                return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).toList();
+
+            if(Set.class.isAssignableFrom(clazz))
+                return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).collect(Collectors.toSet());
             return null;
         }
     }
