@@ -1,5 +1,6 @@
 package hu.adamsan.jsonparser;
 
+import hu.adamsan.jsonparser.testmodels.Items;
 import hu.adamsan.jsonparser.testmodels.Person;
 import org.junit.jupiter.api.Test;
 
@@ -113,6 +114,21 @@ public class JsonConvertTest {
         assertThat(person.getLastName()).hasSize(5).containsExactly(1, 2, 3, 4, 5);
 
         assertThat(person.getFriends()).hasSize(5).containsExactly("Rose", "Martha", "Donna", "Emilia", "Clara");
+    }
+
+    @Test
+    void testJsonArrayConversionCanConvertSimpleObjectRenamingFields() {
+        String input = """
+                {
+                    "name" : "orange",
+                    "price":     25.5,
+                    "type" : "food"
+                }
+                """;
+        Items item = JSON.parse(input).convert(Items.class);
+        assertThat(item.getPrice()).isEqualTo(25.5);
+        assertThat(item.getName()).isEqualTo("orange");
+        assertThat(item.getType()).isEqualTo("food");
     }
 }
 
