@@ -1,12 +1,8 @@
 package hu.adamsan.jsonparser;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -248,9 +244,12 @@ public sealed abstract class JSON {
             Constructor<T> constructor = clazz.getConstructor();
             T object = constructor.newInstance();
 
+            SetterNameFinder finder = new SetterNameFinder(clazz);
             map.entrySet().stream()
                     .forEach(e -> {
-                        var setterName = "set" + e.getKey().value;
+                        String jsonPropertyName = e.getKey().value;
+                        String javaFieldName = finder.getFieldName(jsonPropertyName);
+                        var setterName = "set" + javaFieldName;
                         Arrays.stream(clazz.getMethods())
                                 .filter(m -> m.getName().equalsIgnoreCase(setterName))
                                 .filter(m -> m.getParameterCount() == 1)

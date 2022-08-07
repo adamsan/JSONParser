@@ -1,6 +1,6 @@
 package hu.adamsan.jsonparser;
 
-import hu.adamsan.jsonparser.testmodels.Items;
+import hu.adamsan.jsonparser.testmodels.AnnotatedItem;
 import hu.adamsan.jsonparser.testmodels.Person;
 import org.junit.jupiter.api.Test;
 
@@ -122,10 +122,10 @@ public class JsonConvertTest {
                 {
                     "name" : "orange",
                     "price":     25.5,
-                    "type" : "food"
+                    "tipus" : "food"
                 }
                 """;
-        Items item = JSON.parse(input).convert(Items.class);
+        AnnotatedItem item = JSON.parse(input).convert(AnnotatedItem.class);
         assertThat(item.getPrice()).isEqualTo(25.5);
         assertThat(item.getName()).isEqualTo("orange");
         assertThat(item.getType()).isEqualTo("food");
