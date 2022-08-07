@@ -96,13 +96,23 @@ public class JsonConvertTest {
                         "price": 25.5,
                         "type": "food"
                     },
-                    "age": 35
+                    "age": 35,
+                    "friends": ["Rose", "Martha", "Donna", "Emilia", "Clara"]
                 }
                 """;
         Person person = JSON.parse(input).convert(Person.class);
         assertThat(person.getId()).isNull();
         assertThat(person.getFirstName()).isEqualTo("John");
         assertThat(person.getAge()).isEqualTo(35);
+
+        assertThat(person.getItems().getName()).isEqualTo("orange");
+        assertThat(person.getItems().getPrice()).isEqualTo(25.5);
+        assertThat(person.getItems().getType()).isEqualTo("food");
+
+        // TODO: this wouldn't work with for example if `List<Long>` was the type of lastName
+        assertThat(person.getLastName()).hasSize(5).containsExactly(1, 2, 3, 4, 5);
+
+        assertThat(person.getFriends()).hasSize(5).containsExactly("Rose", "Martha", "Donna", "Emilia", "Clara");
     }
 }
 

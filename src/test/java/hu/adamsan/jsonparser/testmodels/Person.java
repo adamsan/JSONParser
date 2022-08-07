@@ -12,5 +12,6 @@ public class Person {
     private String firstName;
     private String id;
     private Items items;
-    private List<Long> lastName;
+    private List<Integer> lastName;
+    private List<String> friends;
 }

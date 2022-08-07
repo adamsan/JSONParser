@@ -88,7 +88,7 @@ public sealed abstract class JSON {
 
         public JSONString(String value) {
             if (!value.startsWith("\"") || !value.endsWith("\""))
-                throw new IllegalArgumentException("parameter did not start or end with '\"'!");
+                throw new IllegalArgumentException("parameter did not start or end with '\"':\n" + value);
             this.value = value.substring(1, value.length() - 1);
         }
 
@@ -248,13 +248,7 @@ public sealed abstract class JSON {
             Constructor<T> constructor = clazz.getConstructor();
             T object = constructor.newInstance();
 
-            Predicate<Map.Entry<JSONString, JSON>> isSimpleDataOrNull = e ->
-                    e.getValue() instanceof JSONString ||
-                            e.getValue() instanceof JSONNumber ||
-                            e.getValue() instanceof JSONNull;
-
             map.entrySet().stream()
-                    .filter(isSimpleDataOrNull)
                     .forEach(e -> {
                         var setterName = "set" + e.getKey().value;
                         Arrays.stream(clazz.getMethods())
