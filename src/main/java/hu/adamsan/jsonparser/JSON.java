@@ -221,16 +221,28 @@ public sealed abstract class JSON {
                 return (T) arr;
             }
 
-            if (List.class.isAssignableFrom(clazz))
+            if (List.class.isAssignableFrom(clazz)) {
+                boolean isObject = (this.items.get(0) instanceof JSONObject);
+                if (isObject)
+                    return (T) this.items.stream()
+                            .map(o -> (JSONObject) o)
+                            .map(it -> it.convert(clazz.getComponentType()))
+                            .toList();
                 return (T) this.items.stream()
-                        .map(o -> (JSONObject) o)
                         .map(it -> it.convert(clazz.getComponentType()))
                         .toList();
-
-            if (Set.class.isAssignableFrom(clazz))
+            }
+            if (Set.class.isAssignableFrom(clazz)) {
+                boolean isObject = (this.items.get(0) instanceof JSONObject);
+                if (isObject)
+                    return (T) this.items.stream()
+                            .map(o -> (JSONObject) o)
+                            .map(it -> it.convert(clazz.getComponentType()))
+                            .collect(toSet());
                 return (T) this.items.stream()
                         .map(it -> it.convert(clazz.getComponentType()))
                         .collect(toSet());
+            }
             return null;
         }
     }

@@ -66,7 +66,8 @@ public class JsonConvertTest {
     void testJsonArrayConversionCanConvertToIntList() {
         String input = "[1, 10, 20]";
         List<Integer> nums = new ArrayList<>();
-        var json = new JSON.JSONArray(input).convert(nums.getClass());
+        var json = new JSON.JSONArray(input)
+                .convert(nums.getClass());
         assertThat(json).hasSize(3).containsExactly(1, 10, 20);
     }
 
