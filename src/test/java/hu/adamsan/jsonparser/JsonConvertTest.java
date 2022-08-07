@@ -1,6 +1,7 @@
 package hu.adamsan.jsonparser;
 
 import hu.adamsan.jsonparser.testmodels.AnnotatedItem;
+import hu.adamsan.jsonparser.testmodels.ComplexPerson;
 import hu.adamsan.jsonparser.testmodels.Person;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +66,7 @@ public class JsonConvertTest {
     void testJsonArrayConversionCanConvertToIntList() {
         String input = "[1, 10, 20]";
         List<Integer> nums = new ArrayList<>();
-        var json = new JSON.JSONArray(input).convert(nums.getClass()); // TODO: how to preserve type information?
+        var json = new JSON.JSONArray(input).convert(nums.getClass());
         assertThat(json).hasSize(3).containsExactly(1, 10, 20);
     }
 
@@ -81,7 +82,7 @@ public class JsonConvertTest {
     void testJsonArrayConversionCanConvertToStringList() {
         String input = "[\"apple\", \"banana\", \"coconut\"]";
         List<String> nums = new ArrayList<>();
-        var json = new JSON.JSONArray(input).convert(nums.getClass()); // TODO: how to preserve type information?
+        var json = new JSON.JSONArray(input).convert(nums.getClass());
         assertThat(json).hasSize(3).containsExactly("apple", "banana", "coconut");
     }
 
@@ -129,6 +130,34 @@ public class JsonConvertTest {
         assertThat(item.getPrice()).isEqualTo(25.5);
         assertThat(item.getName()).isEqualTo("orange");
         assertThat(item.getType()).isEqualTo("food");
+    }
+
+    @Test
+    void testJsonObjectCoversionWhenObjectHasList() {
+        String input = """
+                {
+                    "id" : 333,
+                    "name" : "clock",
+                    "items": [
+                        { "name" : "gear", "price" : 12, "tipus" : "part" },
+                        { "name" : "bearing", "price" : 4, "tipus" : "part" }
+                    ]
+                }
+                """;
+        var item = JSON.parse(input)
+                .convert(ComplexPerson.class);
+        assertThat(item.getId()).isEqualTo(333);
+        assertThat(item.getName()).isEqualTo("clock");
+
+        var items = item.getItems();
+        assertThat(items).hasSize(2);
+        assertThat(items.get(0).getName()).isEqualTo("gear");
+        assertThat(items.get(0).getPrice()).isEqualTo(12);
+        assertThat(items.get(0).getType()).isEqualTo("part");
+
+        assertThat(items.get(1).getName()).isEqualTo("bearing");
+        assertThat(items.get(1).getPrice()).isEqualTo(4);
+        assertThat(items.get(1).getType()).isEqualTo("part");
     }
 }
 

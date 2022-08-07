@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toSet;
+
 public sealed abstract class JSON {
     private JSON() {
     }
@@ -188,6 +190,25 @@ public sealed abstract class JSON {
             return items.stream().map(JSON::toString).collect(Collectors.joining(", ", "[", "]"));
         }
 
+        public <T, I> T convertCollection(Class<?> clazz, Type itemType) {
+            if (List.class.isAssignableFrom(clazz)) {
+                return (T) items.stream().map(j -> j.convert(findItemJavaType(itemType))).toList();
+            }
+            if (Set.class.isAssignableFrom(clazz)) {
+                return (T) items.stream().map(j -> j.convert(findItemJavaType(itemType))).collect(toSet());
+            }
+            throw new JsonConversionException(this.toString(), clazz, null);
+        }
+
+        private Class<?> findItemJavaType(Type itemType) {
+            String className = itemType.toString().split("\\<|\\>")[1];
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new JsonConversionException(this.toString(), null, e);
+            }
+        }
+
         @Override
         public <T> T convert(Class<T> clazz) {
             if (clazz.isArray()) {
@@ -201,10 +222,15 @@ public sealed abstract class JSON {
             }
 
             if (List.class.isAssignableFrom(clazz))
-                return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).toList();
+                return (T) this.items.stream()
+                        .map(o -> (JSONObject) o)
+                        .map(it -> it.convert(clazz.getComponentType()))
+                        .toList();
 
             if (Set.class.isAssignableFrom(clazz))
-                return (T) this.items.stream().map(it -> it.convert(clazz.getComponentType())).collect(Collectors.toSet());
+                return (T) this.items.stream()
+                        .map(it -> it.convert(clazz.getComponentType()))
+                        .collect(toSet());
             return null;
         }
     }
@@ -214,9 +240,11 @@ public sealed abstract class JSON {
         List<JSONString> keysInOrder = new ArrayList<>();
 
         public JSONObject(String json) {
+            json = json.replace("\n", "");
             String inside = json.substring(1, json.length() - 1);
             List<Integer> commaIndexes = findCommaIndexes(inside);
             splitByIndexes(inside, commaIndexes)
+//                    .peek(insideJson -> System.out.println(insideJson))
                     .map(s -> s.split(":", 2))
                     .forEach(e -> {
                         JSONString key = new JSONString(e[0].trim());
@@ -255,16 +283,28 @@ public sealed abstract class JSON {
                                 .filter(m -> m.getParameterCount() == 1)
                                 .findFirst()
                                 .ifPresent(method -> {
-                                    Class<?> parameterType = method.getParameterTypes()[0];
-                                    Object o = e.getValue().convert(parameterType);
                                     try {
-                                        method.invoke(object, o);
-                                    } catch (IllegalArgumentException | ReflectiveOperationException ex) {
-                                        throw new RuntimeException(ex);
+                                        method.invoke(object, findSetterParameterValue(e.getValue(), method));
+                                    } catch (ReflectiveOperationException ex) {
+                                        throw new JsonConversionException(this.toString(), clazz, ex);
                                     }
                                 });
                     });
             return object;
+        }
+
+        private Object findSetterParameterValue(JSON e, Method method) {
+            var parameterType = method.getParameterTypes()[0];
+            Object o;
+            if (isCollection(parameterType))
+                o = ((JSONArray) e).convertCollection(parameterType, method.getGenericParameterTypes()[0]);
+            else
+                o = e.convert(parameterType);
+            return o;
+        }
+
+        private boolean isCollection(Class<?> clazz) {
+            return List.class.isAssignableFrom(clazz) || Set.class.isAssignableFrom(clazz);
         }
     }
 
